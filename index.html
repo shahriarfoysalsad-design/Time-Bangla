@@ -3,6 +3,75 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
+<title>Menu</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+}
+
+.menu-btn{
+    font-size:30px;
+    padding:10px 15px;
+    cursor:pointer;
+    background:#007bff;
+    color:white;
+    border:none;
+}
+
+.menu{
+    display:none;
+    background:#f1f1f1;
+    width:200px;
+}
+
+.menu a{
+    display:block;
+    padding:12px;
+    text-decoration:none;
+    color:black;
+}
+
+.menu a:hover{
+    background:#ddd;
+}
+</style>
+</head>
+
+<body>
+
+<button class="menu-btn" onclick="openMenu()">☰</button>
+
+<div id="menu" class="menu">
+    <a href="https://shahriarfoysalsad-design.github.io/SFS/">আবহাওয়া</a>
+    <a href="https://shahriarfoysalsad-design.github.io/Web/">খেলা</a>
+    <a href="">বর্তমান ঘটনাবলী</a>
+</div>
+
+<script>
+function openMenu(){
+    var x = document.getElementById("menu");
+
+    if(x.style.display=="block"){
+        x.style.display="none";
+    }else{
+        x.style.display="block";
+    }
+}
+</script>
+
+</body>
+</html>
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
     <meta name="viewport"
     content="width=device-width,
     initial-scale=1">
@@ -29,32 +98,21 @@
 <title>TimeBangla</title>
 
 </html>
-<head>
+
     
-<style>
-button{
-    background-color: blue; /* বাটনের রং */
-    color: white;           /* লেখার রং */
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    font-size: 12px;
-}
 
-</style>
-
-
-</head>
 
 <body>
 
-<a href="https://shahriarfoysalsad-design.github.io/GK/" target="_blank">
-    <button>More</button>
-</a>
+
 </head>
 
 <html>
     <body>
+
+
+
+
 
         <center>
             
@@ -69,23 +127,7 @@ button{
 
             
 
- <b>
-<nav>
-    <a href="https://shahriarfoysalsad-design.github.io/SFS/" target="_blank">
-  <button>আবহাওয়া</button>
-</a>
-<a href="https://shahriarfoysalsad-design.github.io/Web/" target="_blank">
-  <button>খেলা</button>
-</a>
-<a href="" target="_blank">
-  <button>বর্তমান ঘটনাবলী</button>
-</a>
-
-<a href="" target="_blank">
-  <button>আন্তর্জাতিক</button>
-</a>
-</nav>
-</b>
+ 
 <br>
 <nav>
 <a href="#" style="text-decoration: none;">About</a>
@@ -127,13 +169,21 @@ button{
 <br>
 <br>
 
+<img src="6fb17652-dc5e-481c-aa92-de9b05ccdbd8.jpg" alt="Time Bangla Logo" width="50">
+<br>
+<br>
+<br>
+<body style="background-color: black;">
+
+
+
 <!-- Facebook -->
     <a href="https://www.facebook.com/share/18GxdBTh4u/
 " target="_blank">
         <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" 
              alt="Facebook" width="30">
 
-
+</body>
 
 </center>
 
