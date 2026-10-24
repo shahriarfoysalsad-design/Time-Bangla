@@ -1,110 +1,195 @@
 
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport"
-    content="width=device-width,
-    initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#10111b">
+<title>SFS PicBD AI Editor</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#10111b;color:#f5f4ff;
+font-family:Arial,sans-serif}
+header{padding:20px;border-bottom:1px solid #303249}
+.logo{font-size:25px;font-weight:900}
+.logo span{color:#a58cff}
+header p{font-size:12px;color:#999db5}
+main{max-width:950px;margin:auto;padding:20px}
+.card{background:#191b29;border:1px solid #303249;
+border-radius:18px;padding:20px;margin-bottom:18px}
+h2{font-size:18px}
+.drop{border:2px dashed #55506e;border-radius:14px;
+padding:24px;text-align:center;cursor:pointer}
+.drop p{color:#aaaabd;font-size:13px}
+input[type=file]{display:none}
+.preview{display:block;max-width:100%;max-height:430px;
+object-fit:contain;margin:18px auto;border-radius:12px}
+.preview:empty{display:none}
+textarea{width:100%;min-height:115px;resize:vertical;
+background:#11121d;color:white;border:1px solid #393b52;
+border-radius:12px;padding:14px;font:14px Arial;line-height:1.6}
+button,.upload{display:inline-block;padding:13px 17px;
+border:0;border-radius:10px;background:#292b40;color:white;
+cursor:pointer;font-size:14px;text-align:center}
+.primary{background:#8b6cff;color:white}
+button:disabled{opacity:.45;cursor:wait}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.actions button{flex:1}
+.note{font-size:12px;color:#aaaabd;line-height:1.7}
+#status{font-size:13px;line-height:1.6;margin-top:15px}
+.success{color:#83e2b3}
+.error{color:#ff9eaa}
+.loader{display:none;margin:20px auto;width:28px;height:28px;
+border:3px solid #34364d;border-top-color:#a58cff;
+border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+footer{text-align:center;padding:20px;color:#777b95;font-size:12px}
+</style>
 </head>
-<head>
-    <style>
-        div{
-            background:red;
-            color: white;
-            border: 3px soild blue;
-            padding: 23 pixels;
-        }
-    </style>
-</head>
-<body> 
-    <div>
-        
-            <b>
-        <h1>TimeBangla</h1>
-        </b>
-        
+<body>
+<header>
+  <div class="logo">SFS <span>PicBD AI</span></div>
+  <p>YOUR PHOTO. YOUR PROMPT. AI EDITING.</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>01 / Upload your photo</h2>
+    <label class="drop" for="photo">
+      <div style="font-size:35px">＋</div>
+      <strong>Choose a photo</strong>
+      <p>JPG, PNG or WebP · Maximum 10 MB</p>
+    </label>
+    <input id="photo" type="file"
+    accept="image/jpeg,image/png,image/webp">
+    <img id="original" class="preview" alt="Original photo preview">
+  </section>
+
+  <section class="card">
+    <h2>02 / Describe your edit</h2>
+    <textarea id="prompt"
+    placeholder="Example: Blur the background, improve lighting, create a professional portrait and preserve my face."></textarea>
+
+    <p class="note">Write exactly what you want changed. You can write your prompt in English or Bangla.</p>
+
+    <div class="actions">
+      <button id="edit" class="primary">✦ Generate AI Edit</button>
+      <button id="clear">Reset</button>
     </div>
+
+    <div class="loader" id="loader"></div>
+    <div id="status" role="status"></div>
+  </section>
+
+  <section class="card" id="resultCard" hidden>
+    <h2>03 / Your edited photo</h2>
+    <img id="result" class="preview" alt="AI edited photo">
+    <div class="actions">
+      <button class="primary" id="download">↓ Download PNG</button>
+    </div>
+  </section>
+</main>
+
+<footer>© 2026 SFS PicBD · AI Photo Studio</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+let selectedFile = null;
+let editedImage = "";
+
+$("photo").addEventListener("change", () => {
+  const file = $("photo").files[0];
+  if (!file) return;
+
+  if (!["image/jpeg","image/png","image/webp"].includes(file.type)) {
+    show("Please select a JPG, PNG or WebP image.", true);
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    show("Image must be smaller than 10 MB.", true);
+    return;
+  }
+
+  selectedFile = file;
+  $("original").src = URL.createObjectURL(file);
+  $("resultCard").hidden = true;
+  editedImage = "";
+  show("Photo ready. Write your editing prompt.");
+});
+
+function show(message, error = false) {
+  $("status").textContent = message;
+  $("status").className = error ? "error" : "success";
+}
+
+$("edit").addEventListener("click", async () => {
+  if (!selectedFile) {
+    show("First upload a photo.", true);
+    return;
+  }
+
+  const prompt = $("prompt").value.trim();
+  if (!prompt) {
+    show("Write what you want the AI to change.", true);
+    return;
+  }
+
+  $("edit").disabled = true;
+  $("loader").style.display = "block";
+  $("resultCard").hidden = true;
+  show("AI is editing your photo. Please wait...");
+
+  try {
+    const form = new FormData();
+    form.append("image", selectedFile);
+    form.append("prompt", prompt);
+
+    const response = await fetch("/api/edit", {
+      method: "POST",
+      body: form
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "AI editing failed.");
+    }
+
+    editedImage = data.image;
+    $("result").src = editedImage;
+    $("resultCard").hidden = false;
+    show("Your edited photo is ready!");
+    $("resultCard").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  } catch (err) {
+    show(err.message || "Could not connect to the server.", true);
+  } finally {
+    $("edit").disabled = false;
+    $("loader").style.display = "none";
+  }
+});
+
+$("download").addEventListener("click", () => {
+  if (!editedImage) return;
+  const a = document.createElement("a");
+  a.href = editedImage;
+  a.download = "SFS-PicBD-AI-Edited.png";
+  a.click();
+});
+
+$("clear").addEventListener("click", () => {
+  selectedFile = null;
+  editedImage = "";
+  $("photo").value = "";
+  $("prompt").value = "";
+  $("original").removeAttribute("src");
+  $("result").removeAttribute("src");
+  $("resultCard").hidden = true;
+  show("Ready for a new photo.");
+});
+</script>
 </body>
-<title>TimeBangla</title>
-
-
-
-<form accept="">
-    <select onchange="window.open(this.value,'_blank')">
-        <option value="" disabled selected hidden>More</option>
-
-
-    <option value="https://shahriarfoysalsad-design.github.io/SFS/">আবহাওয়া</option>
-        
-     <option value="https://shahriarfoysalsad-design.github.io/Web/">খেলা</option>
-       
-    <option value=" https://shahriarfoysalsad-design.github.io/GK/">বর্তমান ঘটনাবলী</option>
-
-    <option value="">আন্তর্জাতিক</option>
-    </select>
-
-</form>
-
-
-
-
-
-<center>
-<h4>যেকোনো খবর যেকোনো সময় জানুন</h4>
-<br>
-<br>
-
-<img src="0895ccc2-e778-472f-b3aa-e273f2a73e53.jpg" alt="Time Bangla Logo" width="363">
-<br>
-<br>
-<br>
-  <b>আমাদের মূল ক্যাটাগরি সমূহ (Our Categories)</b>
-  <br>
-  <br>
-  <br>
-
-🔴 ব্রেকিং নিউজ: দেশের এবং বিদেশের তাজা খবর মুহূর্তের মধ্যেই।
-<br>
-<br>
-
-🎬 বিনোদন ও লাইফস্টাইল: সিনেমা, নাটক, তারকাদের খবর এবং জীবনযাত্রার টিপস।
-<br>
-<br>
-📈 তথ্য ও প্রযুক্তি: টেক দুনিয়ার নিত্যনতুন আপডেট এবং গ্যাজেট রিভিউ।
-<br>
-<br>
-⚽ খেলাধুলা: ক্রিকেট, ফুটবলসহ মাঠের সব খবর সবার আগে।
-
-<br>
-<br>
-<br>
-
-
-
-</center>
-
-
-<nav>
-<img src="6fb17652-dc5e-481c-aa92-de9b05ccdbd8.jpg" alt="Time Bangla Logo" width="50">
-<img src="7ba911f8-a424-4a6f-8883-dd62ebc68932.jpg" alt="Time Bangla Logo" width="60">
-<img src="d8042a44-54b4-47ba-81c2-e2bb44502c72.jpg" alt="Time Bangla Logo" width="50">
-</nav>
-<br>
-<br>
-<center>🕥সাফল্যের ২০২৬</center>
-
-<br>
-
-<br>
-<center>
-<!-- Facebook -->
-    <a href="https://www.facebook.com/share/18GxdBTh4u/
-" target="_blank">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" 
-        alt="Facebook" width="30">
-        
-
-</center>
-
 </html>
