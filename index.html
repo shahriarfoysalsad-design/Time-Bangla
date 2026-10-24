@@ -1,194 +1,376 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#10111b">
-<title>SFS PicBD AI Editor</title>
+<title>SFS PicBD - AI Photo Editor</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#10111b;color:#f5f4ff;
-font-family:Arial,sans-serif}
-header{padding:20px;border-bottom:1px solid #303249}
-.logo{font-size:25px;font-weight:900}
-.logo span{color:#a58cff}
-header p{font-size:12px;color:#999db5}
-main{max-width:950px;margin:auto;padding:20px}
-.card{background:#191b29;border:1px solid #303249;
-border-radius:18px;padding:20px;margin-bottom:18px}
-h2{font-size:18px}
-.drop{border:2px dashed #55506e;border-radius:14px;
-padding:24px;text-align:center;cursor:pointer}
-.drop p{color:#aaaabd;font-size:13px}
+body{
+ margin:0;background:#0c1020;color:#f4f5ff;
+ font-family:Arial,sans-serif
+}
+header{
+ padding:18px 20px;background:#141a30;
+ border-bottom:1px solid #29304c;
+ display:flex;justify-content:space-between;
+ align-items:center;gap:10px;flex-wrap:wrap
+}
+.logo{font-size:25px;font-weight:bold;color:#a9a5ff}
+.logo span{color:#45e4d0}
+header small{color:#9da6c5}
+main{max-width:1100px;margin:auto;padding:20px}
+h2{font-size:21px}
+.panel{
+ background:#151b30;border:1px solid #2b3452;
+ border-radius:16px;padding:18px;margin-bottom:18px
+}
+.upload{
+ display:block;text-align:center;padding:25px;
+ border:2px dashed #5965a1;border-radius:12px;
+ cursor:pointer;color:#c6caff
+}
 input[type=file]{display:none}
-.preview{display:block;max-width:100%;max-height:430px;
-object-fit:contain;margin:18px auto;border-radius:12px}
-.preview:empty{display:none}
-textarea{width:100%;min-height:115px;resize:vertical;
-background:#11121d;color:white;border:1px solid #393b52;
-border-radius:12px;padding:14px;font:14px Arial;line-height:1.6}
-button,.upload{display:inline-block;padding:13px 17px;
-border:0;border-radius:10px;background:#292b40;color:white;
-cursor:pointer;font-size:14px;text-align:center}
-.primary{background:#8b6cff;color:white}
-button:disabled{opacity:.45;cursor:wait}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-.actions button{flex:1}
-.note{font-size:12px;color:#aaaabd;line-height:1.7}
-#status{font-size:13px;line-height:1.6;margin-top:15px}
-.success{color:#83e2b3}
-.error{color:#ff9eaa}
-.loader{display:none;margin:20px auto;width:28px;height:28px;
-border:3px solid #34364d;border-top-color:#a58cff;
-border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-footer{text-align:center;padding:20px;color:#777b95;font-size:12px}
+.preview{
+ min-height:240px;display:flex;align-items:center;
+ justify-content:center;background:#090d18;
+ border-radius:12px;overflow:hidden
+}
+canvas{display:block;max-width:100%;max-height:65vh}
+#empty{text-align:center;padding:45px 10px;color:#8d96b8}
+textarea,input[type=text]{
+ width:100%;background:#0c1224;color:white;
+ border:1px solid #343e60;border-radius:10px;
+ padding:13px;font-size:15px;outline:none
+}
+textarea{height:90px;resize:vertical}
+button{
+ border:0;border-radius:9px;padding:12px 15px;
+ background:#7668ff;color:white;font-weight:bold;
+ cursor:pointer;font-size:14px
+}
+button:active{transform:scale(.98)}
+.secondary{background:#27314e}
+.green{background:#087f75}
+.buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+label.control{display:block;margin:18px 0;color:#dce1ff}
+.control input{display:block;width:100%;margin-top:10px;accent-color:#8175ff}
+.value{float:right;color:#9da6c5}
+.note{font-size:13px;color:#9da6c5;line-height:1.6}
+footer{text-align:center;padding:20px;color:#838da9}
 </style>
 </head>
 <body>
+
 <header>
-  <div class="logo">SFS <span>PicBD AI</span></div>
-  <p>YOUR PHOTO. YOUR PROMPT. AI EDITING.</p>
+ <div class="logo">SFS <span>PicBD</span></div>
+ <small>Photo Editor Studio</small>
 </header>
 
 <main>
-  <section class="card">
-    <h2>01 / Upload your photo</h2>
-    <label class="drop" for="photo">
-      <div style="font-size:35px">＋</div>
-      <strong>Choose a photo</strong>
-      <p>JPG, PNG or WebP · Maximum 10 MB</p>
-    </label>
-    <input id="photo" type="file"
-    accept="image/jpeg,image/png,image/webp">
-    <img id="original" class="preview" alt="Original photo preview">
-  </section>
+ <section class="panel">
+  <h2>📷 ছবি আপলোড করো</h2>
+  <label class="upload" for="file">
+   <div style="font-size:35px">＋</div>
+   <b>Choose Photo</b>
+   <p class="note">JPG, PNG অথবা WebP ছবি নির্বাচন করো</p>
+  </label>
+  <input type="file" id="file" accept="image/*">
+ </section>
 
-  <section class="card">
-    <h2>02 / Describe your edit</h2>
-    <textarea id="prompt"
-    placeholder="Example: Blur the background, improve lighting, create a professional portrait and preserve my face."></textarea>
+ <section class="panel">
+  <h2>✨ Photo Preview</h2>
+  <div class="preview">
+   <div id="empty">তোমার ছবি এখানে দেখা যাবে</div>
+   <canvas id="canvas" hidden></canvas>
+  </div>
+  <div class="buttons">
+   <button class="secondary" id="undo">Reset Effects</button>
+   <button class="green" id="download">⬇ Download Photo</button>
+  </div>
+ </section>
 
-    <p class="note">Write exactly what you want changed. You can write your prompt in English or Bangla.</p>
+ <section class="panel">
+  <h2>🤖 Prompt Photo Editor</h2>
+  <p class="note">
+   ইংরেজি বা বাংলা Prompt লেখো। এই অফলাইন সংস্করণ
+   পরিচিত শব্দ শনাক্ত করে উপযুক্ত ফিল্টার প্রয়োগ করবে।
+   এটি অনলাইন AI মডেল নয়।
+  </p>
+  <textarea id="prompt"
+   placeholder="যেমন: Make the photo clean, bright and cinematic"></textarea>
+  <div class="buttons">
+   <button id="apply">✨ Apply Prompt</button>
+   <button class="secondary" id="clearPrompt">Clear Prompt</button>
+  </div>
+  <p id="message" class="note"></p>
+ </section>
 
-    <div class="actions">
-      <button id="edit" class="primary">✦ Generate AI Edit</button>
-      <button id="clear">Reset</button>
-    </div>
+ <section class="panel">
+  <h2>🎨 Quick Filters</h2>
+  <div class="buttons">
+   <button class="secondary" data-preset="original">Original</button>
+   <button class="secondary" data-preset="clean">Clean</button>
+   <button class="secondary" data-preset="cinema">Cinematic</button>
+   <button class="secondary" data-preset="bw">Black & White</button>
+   <button class="secondary" data-preset="warm">Warm</button>
+   <button class="secondary" data-preset="vivid">Vivid</button>
+   <button class="secondary" data-preset="soft">Soft</button>
+  </div>
+ </section>
 
-    <div class="loader" id="loader"></div>
-    <div id="status" role="status"></div>
-  </section>
+ <section class="panel">
+  <h2>⚙️ Manual Adjustments</h2>
 
-  <section class="card" id="resultCard" hidden>
-    <h2>03 / Your edited photo</h2>
-    <img id="result" class="preview" alt="AI edited photo">
-    <div class="actions">
-      <button class="primary" id="download">↓ Download PNG</button>
-    </div>
-  </section>
+  <label class="control">
+   Brightness <span class="value" id="bv">100%</span>
+   <input type="range" id="brightness" min="30" max="180" value="100">
+  </label>
+
+  <label class="control">
+   Contrast <span class="value" id="cv">100%</span>
+   <input type="range" id="contrast" min="30" max="180" value="100">
+  </label>
+
+  <label class="control">
+   Saturation <span class="value" id="sv">100%</span>
+   <input type="range" id="saturation" min="0" max="200" value="100">
+  </label>
+
+  <label class="control">
+   Blur <span class="value" id="blv">0px</span>
+   <input type="range" id="blur" min="0" max="5" step=".5" value="0">
+  </label>
+
+  <div class="buttons">
+   <button id="rotate" class="secondary">↻ Rotate 90°</button>
+   <button id="flip" class="secondary">⇋ Flip</button>
+  </div>
+ </section>
+
+ <p class="note">
+  Privacy: ছবি এই পেজের JavaScript দিয়ে তোমার ব্রাউজারেই
+  প্রসেস হয়। এই কোড নিজে থেকে ছবি কোনো সার্ভারে পাঠায় না।
+ </p>
 </main>
 
-<footer>© 2026 SFS PicBD · AI Photo Studio</footer>
+<footer>
+ SFS PicBD · Presented by Shahriar Foysal Sad
+</footer>
 
 <script>
-const $ = id => document.getElementById(id);
-let selectedFile = null;
-let editedImage = "";
+const file = document.getElementById('file');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const empty = document.getElementById('empty');
+const message = document.getElementById('message');
 
-$("photo").addEventListener("change", () => {
-  const file = $("photo").files[0];
-  if (!file) return;
+let img = new Image();
+let loaded = false;
+let rotation = 0;
+let flipped = false;
 
-  if (!["image/jpeg","image/png","image/webp"].includes(file.type)) {
-    show("Please select a JPG, PNG or WebP image.", true);
-    return;
-  }
+const defaults = {
+ brightness:100, contrast:100, saturation:100, blur:0
+};
+let settings = {...defaults};
 
-  if (file.size > 10 * 1024 * 1024) {
-    show("Image must be smaller than 10 MB.", true);
-    return;
-  }
-
-  selectedFile = file;
-  $("original").src = URL.createObjectURL(file);
-  $("resultCard").hidden = true;
-  editedImage = "";
-  show("Photo ready. Write your editing prompt.");
-});
-
-function show(message, error = false) {
-  $("status").textContent = message;
-  $("status").className = error ? "error" : "success";
+function setSettings(s){
+ settings = {...settings,...s};
+ for(const key of Object.keys(defaults)){
+  document.getElementById(key).value = settings[key];
+ }
+ updateLabels();
+ render();
 }
 
-$("edit").addEventListener("click", async () => {
-  if (!selectedFile) {
-    show("First upload a photo.", true);
-    return;
-  }
+function updateLabels(){
+ document.getElementById('bv').textContent=settings.brightness+'%';
+ document.getElementById('cv').textContent=settings.contrast+'%';
+ document.getElementById('sv').textContent=settings.saturation+'%';
+ document.getElementById('blv').textContent=settings.blur+'px';
+}
 
-  const prompt = $("prompt").value.trim();
-  if (!prompt) {
-    show("Write what you want the AI to change.", true);
-    return;
-  }
+function render(){
+ if(!loaded) return;
 
-  $("edit").disabled = true;
-  $("loader").style.display = "block";
-  $("resultCard").hidden = true;
-  show("AI is editing your photo. Please wait...");
+ const w=img.naturalWidth, h=img.naturalHeight;
+ const sideways=Math.abs(rotation%180)===90;
 
-  try {
-    const form = new FormData();
-    form.append("image", selectedFile);
-    form.append("prompt", prompt);
+ canvas.width=sideways?h:w;
+ canvas.height=sideways?w:h;
 
-    const response = await fetch("/api/edit", {
-      method: "POST",
-      body: form
-    });
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.save();
+ ctx.translate(canvas.width/2,canvas.height/2);
+ ctx.rotate(rotation*Math.PI/180);
+ ctx.scale(flipped?-1:1,1);
 
-    const data = await response.json();
+ ctx.filter=
+  `brightness(${settings.brightness}%) `+
+  `contrast(${settings.contrast}%) `+
+  `saturate(${settings.saturation}%) `+
+  `blur(${settings.blur}px)`;
 
-    if (!response.ok) {
-      throw new Error(data.error || "AI editing failed.");
-    }
+ ctx.drawImage(img,-w/2,-h/2,w,h);
+ ctx.restore();
+ ctx.filter='none';
+}
 
-    editedImage = data.image;
-    $("result").src = editedImage;
-    $("resultCard").hidden = false;
-    show("Your edited photo is ready!");
-    $("resultCard").scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  } catch (err) {
-    show(err.message || "Could not connect to the server.", true);
-  } finally {
-    $("edit").disabled = false;
-    $("loader").style.display = "none";
-  }
+file.addEventListener('change',()=>{
+ const f=file.files[0];
+ if(!f) return;
+ if(!f.type.startsWith('image/')){
+  message.textContent='একটি ছবি নির্বাচন করো।';
+  return;
+ }
+
+ const url=URL.createObjectURL(f);
+ const next=new Image();
+
+ next.onload=()=>{
+  img=next;
+  loaded=true;
+  rotation=0;
+  flipped=false;
+  setSettings(defaults);
+  empty.hidden=true;
+  canvas.hidden=false;
+  message.textContent='ছবি প্রস্তুত! এখন এডিট করো।';
+  URL.revokeObjectURL(url);
+ };
+ next.onerror=()=>{
+  message.textContent='ছবিটি খোলা যায়নি। অন্য ছবি চেষ্টা করো।';
+  URL.revokeObjectURL(url);
+ };
+ next.src=url;
 });
 
-$("download").addEventListener("click", () => {
-  if (!editedImage) return;
-  const a = document.createElement("a");
-  a.href = editedImage;
-  a.download = "SFS-PicBD-AI-Edited.png";
+for(const key of Object.keys(defaults)){
+ document.getElementById(key).addEventListener('input',e=>{
+  settings[key]=Number(e.target.value);
+  updateLabels();
+  render();
+ });
+}
+
+const presets={
+ original:{brightness:100,contrast:100,saturation:100,blur:0},
+ clean:{brightness:108,contrast:106,saturation:108,blur:0},
+ cinema:{brightness:95,contrast:125,saturation:115,blur:0},
+ bw:{brightness:103,contrast:115,saturation:0,blur:0},
+ warm:{brightness:105,contrast:105,saturation:120,blur:0},
+ vivid:{brightness:105,contrast:115,saturation:150,blur:0},
+ soft:{brightness:108,contrast:90,saturation:95,blur:.3}
+};
+
+document.querySelectorAll('[data-preset]').forEach(btn=>{
+ btn.addEventListener('click',()=>{
+  setSettings(presets[btn.dataset.preset]);
+  message.textContent='Filter প্রয়োগ করা হয়েছে।';
+ });
+});
+
+document.getElementById('apply').addEventListener('click',()=>{
+ if(!loaded){
+  message.textContent='আগে একটি ছবি আপলোড করো।';
+  return;
+ }
+
+ const p=document.getElementById('prompt').value.toLowerCase();
+ let s={...settings};
+ let found=false;
+
+ if(/black.?and.?white|grayscale|সাদা.?কালো|সাদাকালো/.test(p)){
+  s.saturation=0;s.contrast=115;found=true;
+ }
+ if(/cinematic|movie|সিনেমা|সিনেমাটিক/.test(p)){
+  s.contrast=125;s.saturation=115;s.brightness=95;found=true;
+ }
+ if(/bright|brightness|উজ্জ্বল|আলো/.test(p)){
+  s.brightness=115;found=true;
+ }
+ if(/dark|moody|অন্ধকার/.test(p)){
+  s.brightness=80;s.contrast=115;found=true;
+ }
+ if(/clean|clear|fresh|পরিষ্কার|ফ্রেশ/.test(p)){
+  s.brightness=108;s.contrast=106;s.saturation=108;found=true;
+ }
+ if(/vivid|colorful|colourful|রঙিন/.test(p)){
+  s.saturation=150;s.contrast=110;found=true;
+ }
+ if(/warm|golden|উষ্ণ/.test(p)){
+  s.saturation=120;s.brightness=105;found=true;
+ }
+ if(/soft|blur|নরম|ব্লার/.test(p)){
+  s.blur=1;found=true;
+ }
+ if(/sharp|sharpen|ধারালো/.test(p)){
+  s.contrast=115;s.saturation=105;found=true;
+ }
+
+ if(!p.trim()){
+  message.textContent='প্রথমে Prompt লেখো।';
+  return;
+ }
+ if(!found){
+  message.textContent=
+   'এই Prompt-এর জন্য নির্দিষ্ট ফিল্টার পাওয়া যায়নি। '+
+   'Clean, bright, cinematic, warm, vivid অথবা black and white লেখো।';
+  return;
+ }
+
+ setSettings(s);
+ message.textContent=
+  'Prompt-এর পরিচিত শব্দ অনুযায়ী ইফেক্ট প্রয়োগ হয়েছে। '+
+  'এটি আসল AI জেনারেটিভ এডিট নয়।';
+});
+
+document.getElementById('clearPrompt').addEventListener('click',()=>{
+ document.getElementById('prompt').value='';
+ message.textContent='';
+});
+
+document.getElementById('undo').addEventListener('click',()=>{
+ rotation=0;
+ flipped=false;
+ setSettings(defaults);
+ message.textContent='সব ইফেক্ট Reset করা হয়েছে।';
+});
+
+document.getElementById('rotate').addEventListener('click',()=>{
+ if(!loaded)return;
+ rotation=(rotation+90)%360;
+ render();
+});
+
+document.getElementById('flip').addEventListener('click',()=>{
+ if(!loaded)return;
+ flipped=!flipped;
+ render();
+});
+
+document.getElementById('download').addEventListener('click',()=>{
+ if(!loaded){
+  message.textContent='আগে একটি ছবি আপলোড করো।';
+  return;
+ }
+ canvas.toBlob(blob=>{
+  if(!blob){
+   message.textContent='ছবি সেভ করা যায়নি।';
+   return;
+  }
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='SFS-PicBD-edited.png';
+  document.body.appendChild(a);
   a.click();
-});
-
-$("clear").addEventListener("click", () => {
-  selectedFile = null;
-  editedImage = "";
-  $("photo").value = "";
-  $("prompt").value = "";
-  $("original").removeAttribute("src");
-  $("result").removeAttribute("src");
-  $("resultCard").hidden = true;
-  show("Ready for a new photo.");
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  message.textContent='Edited photo ডাউনলোড শুরু হয়েছে।';
+ },'image/png');
 });
 </script>
 </body>
