@@ -2,376 +2,390 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
+
+    <link rel="icon" type="image/jpg" 
+    href="45c24e4c-a347-4288-a133-0f812d700828.jpg">
+    <link rel="manifest" 
+    href="45c24e4c-a347-4288-a133-0f812d700828.jpg">
+    <meta name="theme-color" content="#0b1020">
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SFS PicBD - AI Photo Editor</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFS TalkBD - Smart Chatbot</title>
+
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;background:#0c1020;color:#f4f5ff;
- font-family:Arial,sans-serif
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#0b1020;
+ color:white;
 }
 header{
- padding:18px 20px;background:#141a30;
- border-bottom:1px solid #29304c;
- display:flex;justify-content:space-between;
- align-items:center;gap:10px;flex-wrap:wrap
+ height:65px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:0 18px;
+ background:#111a30;
+ border-bottom:1px solid #26334d;
 }
-.logo{font-size:25px;font-weight:bold;color:#a9a5ff}
-.logo span{color:#45e4d0}
-header small{color:#9da6c5}
-main{max-width:1100px;margin:auto;padding:20px}
-h2{font-size:21px}
-.panel{
- background:#151b30;border:1px solid #2b3452;
- border-radius:16px;padding:18px;margin-bottom:18px
+.logo{font-size:23px;font-weight:bold;color:#65a9ff}
+.logo span{color:white}
+.status{font-size:11px;color:#69e6a2}
+.container{
+ max-width:850px;
+ margin:auto;
+ padding:15px;
 }
-.upload{
- display:block;text-align:center;padding:25px;
- border:2px dashed #5965a1;border-radius:12px;
- cursor:pointer;color:#c6caff
+.welcome{
+ text-align:center;
+ margin:35px 0 25px;
 }
-input[type=file]{display:none}
-.preview{
- min-height:240px;display:flex;align-items:center;
- justify-content:center;background:#090d18;
- border-radius:12px;overflow:hidden
+.welcome h1{font-size:30px;margin-bottom:8px}
+.welcome p{color:#9baac4}
+#chat{
+ height:calc(100vh - 300px);
+ min-height:280px;
+ overflow-y:auto;
+ padding:12px 2px;
 }
-canvas{display:block;max-width:100%;max-height:65vh}
-#empty{text-align:center;padding:45px 10px;color:#8d96b8}
-textarea,input[type=text]{
- width:100%;background:#0c1224;color:white;
- border:1px solid #343e60;border-radius:10px;
- padding:13px;font-size:15px;outline:none
+.msg{
+ max-width:85%;
+ padding:13px 16px;
+ margin:12px 0;
+ border-radius:15px;
+ line-height:1.6;
+ white-space:pre-wrap;
+ overflow-wrap:anywhere;
 }
-textarea{height:90px;resize:vertical}
+.user{
+ background:#2469ce;
+ margin-left:auto;
+ border-bottom-right-radius:3px;
+}
+.bot{
+ background:#1b2942;
+ margin-right:auto;
+ border-bottom-left-radius:3px;
+}
+.bot small{color:#69aaff;font-weight:bold}
+.input-area{
+ position:sticky;
+ bottom:0;
+ background:#0b1020;
+ padding:12px 0;
+}
+.input-box{
+ display:flex;
+ gap:8px;
+ background:#17243b;
+ border:1px solid #344764;
+ padding:8px;
+ border-radius:15px;
+}
+input{
+ flex:1;
+ min-width:0;
+ border:0;
+ outline:0;
+ background:transparent;
+ color:white;
+ font-size:16px;
+ padding:10px;
+}
 button{
- border:0;border-radius:9px;padding:12px 15px;
- background:#7668ff;color:white;font-weight:bold;
- cursor:pointer;font-size:14px
+ border:0;
+ cursor:pointer;
+ border-radius:10px;
+ padding:11px 16px;
+ font-weight:bold;
 }
-button:active{transform:scale(.98)}
-.secondary{background:#27314e}
-.green{background:#087f75}
-.buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-label.control{display:block;margin:18px 0;color:#dce1ff}
-.control input{display:block;width:100%;margin-top:10px;accent-color:#8175ff}
-.value{float:right;color:#9da6c5}
-.note{font-size:13px;color:#9da6c5;line-height:1.6}
-footer{text-align:center;padding:20px;color:#838da9}
+#send{background:#2879ed;color:white}
+#clear{background:#293a55;color:white}
+.actions{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-top:10px;
+}
+.note{text-align:center;color:#72819a;font-size:11px;margin-top:10px}
+#typing{color:#78b3ff;font-size:13px;padding:8px}
+button:disabled{opacity:.5}
+@media(max-width:500px){
+ .welcome h1{font-size:25px}
+ #chat{height:calc(100vh - 285px)}
+ .msg{max-width:92%}
+}
 </style>
 </head>
+
 <body>
 
 <header>
- <div class="logo">SFS <span>PicBD</span></div>
- <small>Photo Editor Studio</small>
+ <div class="logo">SFS <span>TalkBD</span></div>
+ <div class="status" id="status">Connecting...</div>
 </header>
 
-<main>
- <section class="panel">
-  <h2>📷 ছবি আপলোড করো</h2>
-  <label class="upload" for="file">
-   <div style="font-size:35px">＋</div>
-   <b>Choose Photo</b>
-   <p class="note">JPG, PNG অথবা WebP ছবি নির্বাচন করো</p>
-  </label>
-  <input type="file" id="file" accept="image/*">
- </section>
+<div class="container">
 
- <section class="panel">
-  <h2>✨ Photo Preview</h2>
-  <div class="preview">
-   <div id="empty">তোমার ছবি এখানে দেখা যাবে</div>
-   <canvas id="canvas" hidden></canvas>
+ <div class="welcome" id="welcome">
+  <h1>Welcome to SFS TalkBD</h1>
+  <p>তোমার প্রশ্ন করো, আমি উত্তর খুঁজে দেব।</p>
+ </div>
+
+ <div id="chat"></div>
+ <div id="typing"></div>
+
+ <div class="input-area">
+  <div class="input-box">
+   <input id="message" type="text"
+    placeholder="Ask me"
+    autocomplete="off">
+   <button id="send">Send</button>
   </div>
-  <div class="buttons">
-   <button class="secondary" id="undo">Reset Effects</button>
-   <button class="green" id="download">⬇ Download Photo</button>
+
+  <div class="actions">
+   <span style="font-size:11px;color:#8190aa">
+    Smart Knowledge Assistant
+   </span>
+   <button id="clear">Clear Chat</button>
   </div>
- </section>
+  <div class="note">Powered by SFS</div>
+ </div>
 
- <section class="panel">
-  <h2>🤖 Prompt Photo Editor</h2>
-  <p class="note">
-   ইংরেজি বা বাংলা Prompt লেখো। এই অফলাইন সংস্করণ
-   পরিচিত শব্দ শনাক্ত করে উপযুক্ত ফিল্টার প্রয়োগ করবে।
-   এটি অনলাইন AI মডেল নয়।
-  </p>
-  <textarea id="prompt"
-   placeholder="যেমন: Make the photo clean, bright and cinematic"></textarea>
-  <div class="buttons">
-   <button id="apply">✨ Apply Prompt</button>
-   <button class="secondary" id="clearPrompt">Clear Prompt</button>
-  </div>
-  <p id="message" class="note"></p>
- </section>
+</div>
 
- <section class="panel">
-  <h2>🎨 Quick Filters</h2>
-  <div class="buttons">
-   <button class="secondary" data-preset="original">Original</button>
-   <button class="secondary" data-preset="clean">Clean</button>
-   <button class="secondary" data-preset="cinema">Cinematic</button>
-   <button class="secondary" data-preset="bw">Black & White</button>
-   <button class="secondary" data-preset="warm">Warm</button>
-   <button class="secondary" data-preset="vivid">Vivid</button>
-   <button class="secondary" data-preset="soft">Soft</button>
-  </div>
- </section>
+<script type="module">
 
- <section class="panel">
-  <h2>⚙️ Manual Adjustments</h2>
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-  <label class="control">
-   Brightness <span class="value" id="bv">100%</span>
-   <input type="range" id="brightness" min="30" max="180" value="100">
-  </label>
+import {
+ getFirestore,
+ collection,
+ getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  <label class="control">
-   Contrast <span class="value" id="cv">100%</span>
-   <input type="range" id="contrast" min="30" max="180" value="100">
-  </label>
-
-  <label class="control">
-   Saturation <span class="value" id="sv">100%</span>
-   <input type="range" id="saturation" min="0" max="200" value="100">
-  </label>
-
-  <label class="control">
-   Blur <span class="value" id="blv">0px</span>
-   <input type="range" id="blur" min="0" max="5" step=".5" value="0">
-  </label>
-
-  <div class="buttons">
-   <button id="rotate" class="secondary">↻ Rotate 90°</button>
-   <button id="flip" class="secondary">⇋ Flip</button>
-  </div>
- </section>
-
- <p class="note">
-  Privacy: ছবি এই পেজের JavaScript দিয়ে তোমার ব্রাউজারেই
-  প্রসেস হয়। এই কোড নিজে থেকে ছবি কোনো সার্ভারে পাঠায় না।
- </p>
-</main>
-
-<footer>
- SFS PicBD · Presented by Shahriar Foysal Sad
-</footer>
-
-<script>
-const file = document.getElementById('file');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const empty = document.getElementById('empty');
-const message = document.getElementById('message');
-
-let img = new Image();
-let loaded = false;
-let rotation = 0;
-let flipped = false;
-
-const defaults = {
- brightness:100, contrast:100, saturation:100, blur:0
-};
-let settings = {...defaults};
-
-function setSettings(s){
- settings = {...settings,...s};
- for(const key of Object.keys(defaults)){
-  document.getElementById(key).value = settings[key];
- }
- updateLabels();
- render();
-}
-
-function updateLabels(){
- document.getElementById('bv').textContent=settings.brightness+'%';
- document.getElementById('cv').textContent=settings.contrast+'%';
- document.getElementById('sv').textContent=settings.saturation+'%';
- document.getElementById('blv').textContent=settings.blur+'px';
-}
-
-function render(){
- if(!loaded) return;
-
- const w=img.naturalWidth, h=img.naturalHeight;
- const sideways=Math.abs(rotation%180)===90;
-
- canvas.width=sideways?h:w;
- canvas.height=sideways?w:h;
-
- ctx.clearRect(0,0,canvas.width,canvas.height);
- ctx.save();
- ctx.translate(canvas.width/2,canvas.height/2);
- ctx.rotate(rotation*Math.PI/180);
- ctx.scale(flipped?-1:1,1);
-
- ctx.filter=
-  `brightness(${settings.brightness}%) `+
-  `contrast(${settings.contrast}%) `+
-  `saturate(${settings.saturation}%) `+
-  `blur(${settings.blur}px)`;
-
- ctx.drawImage(img,-w/2,-h/2,w,h);
- ctx.restore();
- ctx.filter='none';
-}
-
-file.addEventListener('change',()=>{
- const f=file.files[0];
- if(!f) return;
- if(!f.type.startsWith('image/')){
-  message.textContent='একটি ছবি নির্বাচন করো।';
-  return;
- }
-
- const url=URL.createObjectURL(f);
- const next=new Image();
-
- next.onload=()=>{
-  img=next;
-  loaded=true;
-  rotation=0;
-  flipped=false;
-  setSettings(defaults);
-  empty.hidden=true;
-  canvas.hidden=false;
-  message.textContent='ছবি প্রস্তুত! এখন এডিট করো।';
-  URL.revokeObjectURL(url);
- };
- next.onerror=()=>{
-  message.textContent='ছবিটি খোলা যায়নি। অন্য ছবি চেষ্টা করো।';
-  URL.revokeObjectURL(url);
- };
- next.src=url;
-});
-
-for(const key of Object.keys(defaults)){
- document.getElementById(key).addEventListener('input',e=>{
-  settings[key]=Number(e.target.value);
-  updateLabels();
-  render();
- });
-}
-
-const presets={
- original:{brightness:100,contrast:100,saturation:100,blur:0},
- clean:{brightness:108,contrast:106,saturation:108,blur:0},
- cinema:{brightness:95,contrast:125,saturation:115,blur:0},
- bw:{brightness:103,contrast:115,saturation:0,blur:0},
- warm:{brightness:105,contrast:105,saturation:120,blur:0},
- vivid:{brightness:105,contrast:115,saturation:150,blur:0},
- soft:{brightness:108,contrast:90,saturation:95,blur:.3}
+// Firebase Configuration
+const firebaseConfig = {
+ apiKey: "AIzaSyC7S7tnI8yQeoiBAXhbSGa8OGT__NlK4cw",
+ authDomain: "sfs-talkbd.firebaseapp.com",
+ projectId: "sfs-talkbd",
+ storageBucket: "sfs-talkbd.firebasestorage.app",
+ messagingSenderId: "623575986195",
+ appId: "1:623575986195:web:7222ca29d1f0f4bd418fe6"
 };
 
-document.querySelectorAll('[data-preset]').forEach(btn=>{
- btn.addEventListener('click',()=>{
-  setSettings(presets[btn.dataset.preset]);
-  message.textContent='Filter প্রয়োগ করা হয়েছে।';
- });
-});
+// Firebase Initialize
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-document.getElementById('apply').addEventListener('click',()=>{
- if(!loaded){
-  message.textContent='আগে একটি ছবি আপলোড করো।';
-  return;
- }
+const chat = document.getElementById("chat");
+const input = document.getElementById("message");
+const send = document.getElementById("send");
+const status = document.getElementById("status");
+const typing = document.getElementById("typing");
+const welcome = document.getElementById("welcome");
 
- const p=document.getElementById('prompt').value.toLowerCase();
- let s={...settings};
- let found=false;
+let knowledge = [];
+let loading = false;
 
- if(/black.?and.?white|grayscale|সাদা.?কালো|সাদাকালো/.test(p)){
-  s.saturation=0;s.contrast=115;found=true;
- }
- if(/cinematic|movie|সিনেমা|সিনেমাটিক/.test(p)){
-  s.contrast=125;s.saturation=115;s.brightness=95;found=true;
- }
- if(/bright|brightness|উজ্জ্বল|আলো/.test(p)){
-  s.brightness=115;found=true;
- }
- if(/dark|moody|অন্ধকার/.test(p)){
-  s.brightness=80;s.contrast=115;found=true;
- }
- if(/clean|clear|fresh|পরিষ্কার|ফ্রেশ/.test(p)){
-  s.brightness=108;s.contrast=106;s.saturation=108;found=true;
- }
- if(/vivid|colorful|colourful|রঙিন/.test(p)){
-  s.saturation=150;s.contrast=110;found=true;
- }
- if(/warm|golden|উষ্ণ/.test(p)){
-  s.saturation=120;s.brightness=105;found=true;
- }
- if(/soft|blur|নরম|ব্লার/.test(p)){
-  s.blur=1;found=true;
- }
- if(/sharp|sharpen|ধারালো/.test(p)){
-  s.contrast=115;s.saturation=105;found=true;
- }
+// Text normalization
+function normalize(text){
+ return String(text || "")
+ .toLowerCase()
+ .normalize("NFC")
+ .replace(/[?!.,،。ঃ:;'"()\-]/g," ")
+ .replace(/\s+/g," ")
+ .trim();
+}
 
- if(!p.trim()){
-  message.textContent='প্রথমে Prompt লেখো।';
-  return;
- }
- if(!found){
-  message.textContent=
-   'এই Prompt-এর জন্য নির্দিষ্ট ফিল্টার পাওয়া যায়নি। '+
-   'Clean, bright, cinematic, warm, vivid অথবা black and white লেখো।';
-  return;
- }
+// Database থেকে Knowledge Load
+async function loadKnowledge(){
+ try{
+  status.textContent="Connecting...";
 
- setSettings(s);
- message.textContent=
-  'Prompt-এর পরিচিত শব্দ অনুযায়ী ইফেক্ট প্রয়োগ হয়েছে। '+
-  'এটি আসল AI জেনারেটিভ এডিট নয়।';
-});
+  const snapshot = await getDocs(
+   collection(db,"knowledge")
+  );
 
-document.getElementById('clearPrompt').addEventListener('click',()=>{
- document.getElementById('prompt').value='';
- message.textContent='';
-});
+  knowledge = snapshot.docs.map(doc=>doc.data())
+   .filter(item=>item.question && item.answer);
 
-document.getElementById('undo').addEventListener('click',()=>{
- rotation=0;
- flipped=false;
- setSettings(defaults);
- message.textContent='সব ইফেক্ট Reset করা হয়েছে।';
-});
+  status.textContent="● Online";
+  status.style.color="#69e6a2";
 
-document.getElementById('rotate').addEventListener('click',()=>{
- if(!loaded)return;
- rotation=(rotation+90)%360;
- render();
-});
-
-document.getElementById('flip').addEventListener('click',()=>{
- if(!loaded)return;
- flipped=!flipped;
- render();
-});
-
-document.getElementById('download').addEventListener('click',()=>{
- if(!loaded){
-  message.textContent='আগে একটি ছবি আপলোড করো।';
-  return;
- }
- canvas.toBlob(blob=>{
-  if(!blob){
-   message.textContent='ছবি সেভ করা যায়নি।';
-   return;
+  if(knowledge.length===0){
+   status.textContent="No knowledge found";
   }
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='SFS-PicBD-edited.png';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-  message.textContent='Edited photo ডাউনলোড শুরু হয়েছে।';
- },'image/png');
+
+ }catch(error){
+  console.error(error);
+  status.textContent="Database Error";
+  status.style.color="#ff7777";
+ }
+}
+
+// Question Matching
+function findAnswer(question){
+
+ const q = normalize(question);
+ const words = q.split(" ").filter(w=>w.length>1);
+
+ let best = null;
+ let bestScore = 0;
+
+ for(const item of knowledge){
+
+  const questionText = normalize(item.question);
+  const keywords = Array.isArray(item.keywords)
+   ? item.keywords.map(normalize)
+   : typeof item.keywords==="string"
+   ? item.keywords.split(",").map(normalize)
+   : [];
+
+  let score = 0;
+
+  // Exact question
+  if(q===questionText){
+   score=100;
+  }else{
+
+   // Question word matching
+   for(const word of words){
+    if(questionText.includes(word)){
+     score+=3;
+    }
+   }
+
+   // Keyword matching
+   for(const keyword of keywords){
+    if(keyword && q.includes(keyword)){
+     score+=5;
+    }else if(keyword && words.some(w=>keyword.includes(w))){
+     score+=2;
+    }
+   }
+
+   // Partial phrase matching
+   if(q.includes(questionText) && questionText.length>2){
+    score+=8;
+   }
+  }
+
+  if(score>bestScore){
+   bestScore=score;
+   best=item;
+  }
+ }
+
+ // Minimum matching score
+ if(best && bestScore>=5){
+  return best.answer;
+ }
+
+ return "দুঃখিত! এই প্রশ্নের উত্তর আমার Database-এ শাহরিয়ার ফয়সাল সাদ এখনো Add করেনি । অন্যভাবে প্রশ্নটি লিখে দেখতে পারো।";
+}
+
+// Chat Display
+function addMessage(text,type){
+ welcome.style.display="none";
+
+ const div=document.createElement("div");
+ div.className="msg "+type;
+
+ if(type==="bot"){
+  const label=document.createElement("small");
+  label.textContent="SFS TalkBD";
+  div.appendChild(label);
+  div.appendChild(document.createElement("br"));
+ }
+
+ const content=document.createElement("span");
+ content.textContent=text;
+ div.appendChild(content);
+
+ chat.appendChild(div);
+ chat.scrollTop=chat.scrollHeight;
+
+ saveHistory();
+}
+
+// History Save
+function saveHistory(){
+ const history=[...chat.children].map(item=>({
+  text:item.innerText.replace(/^SFS TalkBD\n?/,""),
+  type:item.classList.contains("user")?"user":"bot"
+ }));
+
+ try{
+  localStorage.setItem("sfs_history",JSON.stringify(history));
+ }catch(e){}
+}
+
+// History Load
+function loadHistory(){
+ try{
+  const history=JSON.parse(
+   localStorage.getItem("sfs_history") || "[]"
+  );
+
+  history.forEach(item=>{
+   addMessage(item.text,item.type);
+  });
+ }catch(e){}
+}
+
+// Send Message
+async function sendMessage(){
+
+ const question=input.value.trim();
+
+ if(!question || loading)return;
+
+ if(knowledge.length===0){
+  addMessage("Database এখনো প্রস্তুত নয়। কিছুক্ষণ পর আবার চেষ্টা করো।","bot");
+  return;
+ }
+
+ loading=true;
+ send.disabled=true;
+
+ addMessage(question,"user");
+ input.value="";
+
+ typing.textContent="SFS TalkBD is thinking...";
+
+ // Matching
+ await new Promise(resolve=>setTimeout(resolve,350));
+
+ const answer=findAnswer(question);
+
+ typing.textContent="";
+ addMessage(answer,"bot");
+
+ loading=false;
+ send.disabled=false;
+ input.focus();
+}
+
+// Events
+send.addEventListener("click",sendMessage);
+
+input.addEventListener("keydown",e=>{
+ if(e.key==="Enter")sendMessage();
 });
+
+document.getElementById("clear").addEventListener("click",()=>{
+ chat.innerHTML="";
+ localStorage.removeItem("sfs_history");
+ welcome.style.display="block";
+});
+
+loadKnowledge();
+loadHistory();
+
 </script>
 </body>
 </html>
